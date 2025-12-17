@@ -6,7 +6,6 @@ YEAR = 2025
 DAY = 8
 puzzle = Puzzle(year= YEAR, day= DAY)
 
-# input_data = puzzle.examples[0].input_data.splitlines()
 input_data = puzzle.input_data.splitlines()
 
 def euclidian_distance(p, q) -> int:
@@ -49,7 +48,11 @@ class UnionFind:
         circuit_sizes = [self.size[i] for i in range(len(self.parent)) if self.parent[i] == i]
         sorted_sizes = sorted(circuit_sizes, reverse= True)
         return reduce(lambda x, y: x * y, sorted_sizes[: n])
-        
+    
+    @property
+    def connected_components(self):
+        return sum(1 for i in range(len(self.parent)) if self.parent[i] == i)
+    
 
 points = []
 for line in input_data:
@@ -71,13 +74,26 @@ uf = UnionFind(len(points)) #initializes UF with all points from circuit boxes
 successful_connections = 0
 counter = 0
 LIMIT = 1000
-for dist, i, j in distances:
-    if uf.union(i, j):
-        successful_connections += 1
-    
-    counter += 1
-    if counter == LIMIT:
-        break
+part_one = False
+if part_one:
+    for dist, i, j in distances:
+        if uf.union(i, j):
+            successful_connections += 1
+        
+        counter += 1
+        if counter == LIMIT:
+            break
 
-print(f'Part 1: {uf.part_one}')
-puzzle.answer_a = uf.part_one
+    print(f'Part 1: {uf.part_one}')
+    puzzle.answer_a = uf.part_one
+else:
+    connection_idx = 0
+    while uf.connected_components > 1:
+        dist, i, j = distances[connection_idx]
+        if uf.union(i, j):
+            last_i, last_j = i, j
+        
+        connection_idx += 1
+    part_two = points[last_i][0] * points[last_j][0]
+    print(f"Part two answer: {part_two}")
+    puzzle.answer_b = part_two
